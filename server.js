@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const qrcode = require('qrcode');
-const { default: makeWASocket, useSingleFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const makeWASocket = require('@whiskeysockets/baileys').default;
+const { useSingleFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
 
 const { state, saveState } = useSingleFileAuthState('./auth.json');
@@ -22,7 +23,6 @@ async function connectToWhatsApp() {
 
         if (qr) {
             console.log('QR Code gerado!');
-            // Salva o QR Code para servir na rota
             global.latestQR = await qrcode.toDataURL(qr);
         }
 
@@ -42,7 +42,8 @@ async function connectToWhatsApp() {
 
 connectToWhatsApp();
 
-// API: retorna o QR Code atual
+app.use(cors());
+
 app.get('/api/qr', (req, res) => {
     if (global.latestQR) {
         res.send(`<img src="${global.latestQR}" style="width:300px"/>`);
@@ -52,5 +53,5 @@ app.get('/api/qr', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`✅ Servidor rodando em http://localhost:${port}`);
+    console.log(`✅ Servidor rodando na porta ${port}`);
 });
